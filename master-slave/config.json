@@ -1,0 +1,20 @@
+{
+    "components" : [
+        {
+            "name" : "Master",
+            "host" : "localhost",
+            "protocols" :  ["MPI"],
+            "listen-endpoints" : ["MPI:0:10"]
+        },
+        {
+            "name" : "Worker1",
+            "host" : "localhost",
+            "protocols" : ["MPI"]
+        },
+        {
+            "name" : "Worker2",
+            "host" : "localhost",
+            "protocols" : ["MPI"]
+        }
+    ]
+}
