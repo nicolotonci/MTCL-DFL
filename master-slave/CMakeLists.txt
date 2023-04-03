@@ -38,6 +38,17 @@ target_include_directories(slave PRIVATE
 )
 set_property(TARGET master slave PROPERTY CXX_STANDARD 20)
 
+find_library(LIBRT rt)
+if(LIBRT)
+target_link_libraries(master ${LIBRT})
+target_link_libraries(slave ${LIBRT})
+endif()
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(master Threads::Threads)
+target_link_libraries(slave Threads::Threads)
+
 find_package(MPI)
 
 if ( NOT MPI_FOUND )
@@ -53,4 +64,4 @@ if (MPI_FOUND)
 endif()
 
 # use this instruction to copy config file 
-configure_file(config.json config.json COPYONLY)
+#configure_file(config.json config.json COPYONLY)
