@@ -25,10 +25,6 @@ include_directories(${MTCL_DIR})
 #set(TORCH_CXX_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=1")
 #set(TORCH_CXX_FLAGS "-DSTRIP_ERROR_MESSAGES")
 
-
-find_package(Torch REQUIRED HINTS $ENV{TORCH_HOME})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
-
 add_executable(master-d master.cpp)
 add_executable(slave-d slave.cpp)
 add_executable(broker broker.cpp)

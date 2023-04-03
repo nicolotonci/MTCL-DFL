@@ -21,8 +21,8 @@ if(MTCL_DIR STREQUAL "MTCL_DIR-NOTFOUND")
 endif()
 include_directories(${MTCL_DIR})
 
-find_package(Torch REQUIRED HINTS $ENV{TORCH_HOME})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+#find_package(Torch REQUIRED HINTS $ENV{TORCH_HOME})
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 add_executable(master master.cpp)
 add_executable(slave slave.cpp)
