@@ -42,7 +42,6 @@ int main(int argc, char *argv[]) {
         device_type = torch::kCPU;
     }
     torch::Device device(device_type);
-    //torch::set_num_threads(nt);
 
     torch::cuda::manual_seed_all(42);
 
@@ -58,29 +57,31 @@ int main(int argc, char *argv[]) {
     auto test_data_loader = torch::data::make_data_loader(test_dataset, test_batchsize);
 
     Manager::init("Master", "config.json");
+
     auto broker = Manager::getNext();
+
     auto model = new Net;
+    model->to(device);
     FedAvg<Net*> aggregator(model);
-    
+    size_t model_size = serializeModel(*model).size();
+    broker.send(&model_size, sizeof(size_t));
+    char* buff = new char[model_size];
     for (int round = 0;  round < rounds; ++round){
         aggregator.new_round();
         auto serialized_model = serializeModel(*model);
-        size_t model_size = serialized_model.size();
+        assert(serialized_model.size() == model_size);
         broker.send(serialized_model.c_str(), model_size);
 
         // skip my portion
-        char* buff = new char[model_size];
         for(int i = 0; i < num_workers; i++) {
             broker.receive(buff, model_size);
             auto received_model = deserializeModel(buff, model_size);
             aggregator.update_from(&received_model);
         }
 
-        delete [] buff;
-
         test(model, device, *test_data_loader);
     }
-    
+    delete [] buff;
     broker.close();
     Manager::finalize(true);
     return 0;

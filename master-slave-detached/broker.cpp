@@ -9,25 +9,27 @@ int main(int argc, char *argv[]) {
     auto gather = Manager::createTeam("Broker:Worker1:Worker2", "Broker", GATHER);
 
 
-    size_t bufferSize;
+    size_t modelSize;
+    master.receive(&modelSize, sizeof(size_t));
+    char* buffer = new char[modelSize];
+    char* backBuff = new char[modelSize * gather.size()];
+    while(true){
+        if (master.receive(buffer, modelSize) == 0)
+            break;
 
-    while(master.probe(bufferSize)){
-        char* buffer = new char[bufferSize];
-        master.receive(buffer, bufferSize);
-        bcast.send(buffer, bufferSize);
-        delete [] buffer;
+        bcast.sendrecv(buffer, modelSize, nullptr, 0);
 
-        char* backBuff = new char[bufferSize * gather.size()];
-
-        gather.sendrecv(backBuff, bufferSize, backBuff, bufferSize); // local send not meaningful, just skipped
+        gather.sendrecv(backBuff, modelSize, backBuff, modelSize); // local send not meaningful, just skipped
 
         for(int i = 1; i < gather.size(); i++)
-            master.send(backBuff+(i*bufferSize), bufferSize);
+            master.send(backBuff+(i*modelSize), modelSize);
 
         delete [] backBuff;
     }
 
     master.close();
+    std::string eos("EOS", modelSize);
+    bcast.sendrecv(eos.c_str(), modelSize, nullptr, 0);
     bcast.close();
     Manager::finalize(true);
     return 0;

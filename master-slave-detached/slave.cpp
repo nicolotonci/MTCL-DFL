@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     if (argc >= 7)
         num_workers = atoi(argv[6]);
 
-    std::cout << "Training on " << num_workers << " wokers." << std::endl;
+    std::cout << "Training on " << num_workers << " workers." << std::endl;
 
     // Use GPU, if available
     torch::DeviceType device_type;
@@ -49,49 +49,48 @@ int main(int argc, char *argv[]) {
 
     torch::cuda::manual_seed_all(42);
 
-    // Get train and test data
+    // Get train
     auto train_dataset = torch::data::datasets::MNIST(data_path)
-            .map(torch::data::transforms::Normalize<>(0.1307, 0.3081))
-            .map(torch::data::transforms::Stack<>());
-
-    auto test_dataset = torch::data::datasets::MNIST(data_path, torch::data::datasets::MNIST::Mode::kTest)
             .map(torch::data::transforms::Normalize<>(0.1307, 0.3081))
             .map(torch::data::transforms::Stack<>());
 
     Manager::init("Worker"+std::to_string(worker_id), "config.json");
 
-    auto bcast = Manager::createTeam("Master:Worker1:Worker2", "Master", BROADCAST);
-    auto gather = Manager::createTeam("Master:Worker1:Worker2", "Master", GATHER);
+    auto bcast = Manager::createTeam("Broker:Worker1:Worker2", "Broker", BROADCAST);
+    auto gather = Manager::createTeam("Broker:Worker1:Worker2", "Broker", GATHER);
 
     auto train_data_loader = torch::data::make_data_loader(train_dataset, torch::data::samplers::DistributedRandomSampler(
                                                                                                                train_dataset.size().value(),
-                                                                                                               1/*num_workers*/,
+                                                                                                               8,
                                                                                                                worker_id%8,
                                                                                                                false),
                                                                                                        train_batchsize);
-    auto optimizer = torch::optim::SGD(Net().parameters(), torch::optim::SGDOptions(0.01).momentum(0.5));
+    
 
-    int epoch = 0;
+    size_t modelSize;
+    bcast.sendrecv(nullptr, 0, &modelSize, sizeof(size_t));
+    char* buff = new char[modelSize];
     while (true){
-        size_t received_size = -1;
-        bcast.probe(received_size, true);
-        if (!received_size){
+        bcast.sendrecv(nullptr, 0, buff, modelSize);
+        if (buff[0] == 'E' && buff[1] == 'O' && buff[2] == 'S') {
+            std::cerr << "Received EOS!\n";
             gather.close();
             break;
         }
-
-        char* buff = new char[received_size];
-        bcast.receive(buff, received_size);
-        Net inputModel = deserializeModel(buff, received_size);
-        delete [] buff;
-
+        Net inputModel = deserializeModel(buff, modelSize);
+        inputModel.to(device);
+        torch::optim::SGD optimizer(inputModel.parameters(), torch::optim::SGDOptions(0.01).momentum(0.5));
+        
         for (int i = 0; i < train_epochs; i++) {
-            train(++epoch, &inputModel, device, *train_data_loader, optimizer, std::to_string(worker_id));
+            train(i, &inputModel, device, *train_data_loader, optimizer, std::to_string(worker_id));
         }
 
         auto serialized_model = serializeModel(inputModel);
-        gather.sendrecv(serialized_model.c_str(), serialized_model.size(), nullptr, 0);
+        assert(modelSize == serialized_model.size()); // check
+        gather.sendrecv(serialized_model.c_str(), modelSize, nullptr, modelSize);
     }
+
+    delete [] buff;
 
     Manager::finalize();
     return 0;
