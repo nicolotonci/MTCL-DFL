@@ -2,9 +2,9 @@ ifndef CXX
 CXX 	   = g++
 endif
 
-CXXFLAGS  += -std=c++17
-INCS       = -I$(MTCL_HOME) -I$(RAPIDJSON_HOME) -I$(TORCH_HOME)/include
-LIBS       = -L$(TORCH_HOME)/lib
+CXXFLAGS  += -std=c++17 -DENABLE_CONFIGFILE -D_GLIBCXX_USE_CXX11_ABI=0 
+INCS       = -I .. -I$(MTCL_HOME)/include -I$(RAPIDJSON_HOME)/include -I$(TORCH_HOME)/include -I${TORCH_HOME}/include/torch/csrc/api/include
+LIBS       = -L$(TORCH_HOME)/lib -ltorch -ltorch_cpu -lc10
 
 ifdef DEBUG
 	OPTIMIZE_FLAGS  += -g -fno-inline-functions
@@ -19,7 +19,7 @@ endif
 ifeq ($(findstring MPI,$(TPROTOCOL)),MPI)
 	CXX 	  = mpicxx
 	CXXFLAGS += -DENABLE_$(TPROTOCOL)
-	TARGET    = ../include/protocols/stop_accept
+
 ifdef MPI_HOME
 	INCS   += `pkg-config --cflags-only-I $(MPI_HOME)/lib/pkgconfig/ompi-cxx.pc`
 	LIBS   += `pkg-config --libs $(MPI_HOME)/lib/pkgconfig/ompi-cxx.pc`
