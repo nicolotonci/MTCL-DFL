@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     Manager::init("Worker"+std::to_string(worker_id), "config.json");
 
     auto bcast = Manager::createTeam("Broker:Worker1:Worker2", "Broker", BROADCAST);
-    auto gather = Manager::createTeam("Broker:Worker1:Worker2", "Broker", GATHER);
+    auto gather = Manager::createTeam("Broker:Worker1:Worker2", "Broker", MTCL_GATHER);
 
     auto train_data_loader = torch::data::make_data_loader(train_dataset, torch::data::samplers::DistributedRandomSampler(
                                                                                                                train_dataset.size().value(),

@@ -4,7 +4,7 @@ endif
 
 CXXFLAGS  += -std=c++17 -DENABLE_CONFIGFILE -D_GLIBCXX_USE_CXX11_ABI=0 
 INCS       = -I .. -I$(MTCL_HOME)/include -I$(RAPIDJSON_HOME)/include -I$(TORCH_HOME)/include -I${TORCH_HOME}/include/torch/csrc/api/include
-LIBS       = -L$(TORCH_HOME)/lib -ltorch -ltorch_cpu -lc10
+LIBS       = -L$(TORCH_HOME)/lib -ltorch -ltorch_cpu -lc10 -ltorch_global_deps
 
 ifdef DEBUG
 	OPTIMIZE_FLAGS  += -g -fno-inline-functions

@@ -6,7 +6,7 @@ int main(int argc, char *argv[]) {
 
     auto master = Manager::connect("TCP:Master");
     auto bcast = Manager::createTeam("Broker:Worker1:Worker2", "Broker", BROADCAST);
-    auto gather = Manager::createTeam("Broker:Worker1:Worker2", "Broker", GATHER);
+    auto gather = Manager::createTeam("Broker:Worker1:Worker2", "Broker", MTCL_GATHER);
 
 
     size_t modelSize;
