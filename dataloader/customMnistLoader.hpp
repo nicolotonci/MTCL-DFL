@@ -9,6 +9,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <optional>
 
 class TORCH_API customMnistLoader : public torch::data::datasets::Dataset<customMnistLoader> {
 private:
@@ -63,8 +64,8 @@ static std::string join_paths(std::string head, const std::string& tail) {
 static torch::Tensor read_images(const std::string& root, bool train) {
   const auto path =
       join_paths(root, train ? kTrainImagesFilename : kTestImagesFilename);
-  std::ifstream images(path, std::ios::binary);
-  TORCH_CHECK(images, "Error opening images file at ", path);
+  std::ifstream __images(path, std::ios::binary);
+  TORCH_CHECK(__images, "Error opening images file at ", path);
 
   //const auto count = train ? kTrainSize : kTestSize;
 
@@ -75,16 +76,16 @@ static torch::Tensor read_images(const std::string& root, bool train) {
   expect_int32(images, kImageColumns);*/
 
     // read magic number
-  read_int32(images);
+  read_int32(__images);
   // read count of images
-  auto count = read_int32(images);
+  auto count = read_int32(__images);
 
-  expect_int32(images, kImageRows);
-  expect_int32(images, kImageColumns);
+  expect_int32(__images, kImageRows);
+  expect_int32(__images, kImageColumns);
  
   auto tensor =
       torch::empty({count, 1, kImageRows, kImageColumns}, torch::kByte);
-  images.read(reinterpret_cast<char*>(tensor.data_ptr()), tensor.numel());
+  __images.read(reinterpret_cast<char*>(tensor.data_ptr()), tensor.numel());
   return tensor.to(torch::kFloat32).div_(255);
 }
 
@@ -134,7 +135,7 @@ bool is_train() const noexcept {
 }
 
   /// Returns all images stacked into a single tensor.
-const torch::Tensor& customMnistLoader::images() const {
+const torch::Tensor& images() const {
   return images_;
 }
 
