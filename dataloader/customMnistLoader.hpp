@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-class TORCH_API customMnistLoader : public Dataset<customMnistLoader> {
+class TORCH_API customMnistLoader : public torch::data::datasets::Dataset<customMnistLoader> {
 private:
 static constexpr uint32_t kTrainSize = 60000;
 static constexpr uint32_t kTestSize = 10000;
