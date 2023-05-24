@@ -12,18 +12,18 @@
 
 class TORCH_API customMnistLoader : public Dataset<customMnistLoader> {
 private:
-constexpr uint32_t kTrainSize = 60000;
-constexpr uint32_t kTestSize = 10000;
+static constexpr uint32_t kTrainSize = 60000;
+static constexpr uint32_t kTestSize = 10000;
 
-constexpr uint32_t kImageMagicNumber = 2051;
-constexpr uint32_t kTargetMagicNumber = 2049;
+static constexpr uint32_t kImageMagicNumber = 2051;
+static constexpr uint32_t kTargetMagicNumber = 2049;
 
-constexpr uint32_t kImageRows = 28;
-constexpr uint32_t kImageColumns = 28;
-constexpr const char* kTrainImagesFilename = "train-images-idx3-ubyte";
-constexpr const char* kTrainTargetsFilename = "train-labels-idx1-ubyte";
-constexpr const char* kTestImagesFilename = "t10k-images-idx3-ubyte";
-constexpr const char* kTestTargetsFilename = "t10k-labels-idx1-ubyte";
+static constexpr uint32_t kImageRows = 28;
+static constexpr uint32_t kImageColumns = 28;
+static constexpr const char* kTrainImagesFilename = "train-images-idx3-ubyte";
+static constexpr const char* kTrainTargetsFilename = "train-labels-idx1-ubyte";
+static constexpr const char* kTestImagesFilename = "t10k-images-idx3-ubyte";
+static constexpr const char* kTestTargetsFilename = "t10k-labels-idx1-ubyte";
 
 static bool check_is_little_endian() {
   const uint32_t word = 1;
@@ -60,7 +60,7 @@ static std::string join_paths(std::string head, const std::string& tail) {
   return head;
 }
 
-static Tensor read_images(const std::string& root, bool train) {
+static torch::Tensor read_images(const std::string& root, bool train) {
   const auto path =
       join_paths(root, train ? kTrainImagesFilename : kTestImagesFilename);
   std::ifstream images(path, std::ios::binary);
@@ -88,7 +88,7 @@ static Tensor read_images(const std::string& root, bool train) {
   return tensor.to(torch::kFloat32).div_(255);
 }
 
-static Tensor read_targets(const std::string& root, bool train) {
+static torch::Tensor read_targets(const std::string& root, bool train) {
   const auto path =
       join_paths(root, train ? kTrainTargetsFilename : kTestTargetsFilename);
   std::ifstream targets(path, std::ios::binary);
@@ -118,12 +118,12 @@ static Tensor read_targets(const std::string& root, bool train) {
       targets_(read_targets(root, mode == Mode::kTrain)) {}
 
   /// Returns the `Example` at the given `index`.
-Example<> get(size_t index) {
+torch::data::Example<> get(size_t index) {
     return {images_[index], targets_[index]};
 }
 
   /// Returns the size of the dataset.
-optional<size_t> size() const {
+std::optional<size_t> size() const {
   return images_.size(0);
 }
 
@@ -134,17 +134,17 @@ bool is_train() const noexcept {
 }
 
   /// Returns all images stacked into a single tensor.
-const Tensor& customMnistLoader::images() const {
+const torch::Tensor& customMnistLoader::images() const {
   return images_;
 }
 
   /// Returns all targets stacked into a single tensor.
-const Tensor& targets() const {
+const torch::Tensor& targets() const {
   return targets_;
 }
 
  private:
-  Tensor images_, targets_;
+  torch::Tensor images_, targets_;
 };
 
 
