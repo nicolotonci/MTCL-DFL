@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include <torch/torch.h>
 #include "fl/traintest.hpp"
+#include "dataloader/customMnistLoader.hpp"
 
 int main(int argc, char *argv[]) {
 
@@ -50,7 +51,7 @@ int main(int argc, char *argv[]) {
     torch::cuda::manual_seed_all(42);
 
     // Get train
-    auto train_dataset = torch::data::datasets::MNIST(data_path)
+    auto train_dataset = customMnistLoader(data_path)
             .map(torch::data::transforms::Normalize<>(0.1307, 0.3081))
             .map(torch::data::transforms::Stack<>());
 

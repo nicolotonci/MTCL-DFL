@@ -45,11 +45,7 @@ int main(int argc, char *argv[]) {
 
     torch::cuda::manual_seed_all(42);
 
-    // Get train and test data
-    auto train_dataset = torch::data::datasets::MNIST(data_path)
-            .map(torch::data::transforms::Normalize<>(0.1307, 0.3081))
-            .map(torch::data::transforms::Stack<>());
-
+    // Get test data
     auto test_dataset = torch::data::datasets::MNIST(data_path, torch::data::datasets::MNIST::Mode::kTest)
             .map(torch::data::transforms::Normalize<>(0.1307, 0.3081))
             .map(torch::data::transforms::Stack<>());
