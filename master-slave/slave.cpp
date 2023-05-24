@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[]) {
 
-    int num_workers = 2;                // Number of workers
+    int num_workers = 8;                // Number of workers
     int train_batchsize = 64;           // Train batch size
     int test_batchsize = 1000;          // Test batch size
     int train_epochs = 2;               // Number of training epochs at workers in each round
@@ -57,8 +57,9 @@ int main(int argc, char *argv[]) {
 
     Manager::init("Worker"+std::to_string(worker_id), "config.json");
 
-    auto bcast = Manager::createTeam("Master:Worker1:Worker2", "Master", BROADCAST);
-    auto gather = Manager::createTeam("Master:Worker1:Worker2", "Master", GATHER);
+    auto bcast = Manager::createTeam("Master:Worker1:Worker2:Worker3:Worker4:Worker5:Worker6:Worker7:Worker8", "Master", BROADCAST);
+    auto gather = Manager::createTeam("Master:Worker1:Worker2:Worker3:Worker4:Worker5:Worker6:Worker7:Worker8", "Master", MTCL_GATHER);
+    
 
     auto train_data_loader = torch::data::make_data_loader(train_dataset, torch::data::samplers::DistributedRandomSampler(
                                                                                                                train_dataset.size().value(),
