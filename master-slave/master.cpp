@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
         test(model, device, *test_data_loader);
     }
     delete [] buff;
-    std::string eos(modelSize, 'E'); eos[1] = 'O'; eos[2] = 'S';
+    std::string eos(model_size, 'E'); eos[1] = 'O'; eos[2] = 'S';
     bcast.sendrecv(eos.c_str(), model_size, nullptr, 0);
     bcast.close();
     Manager::finalize(true);
