@@ -99,8 +99,8 @@ static torch::Tensor read_targets(const std::string& root, bool train) {
 
   //expect_int32(targets, kTargetMagicNumber);
   // read magic number
-  read_int32(images);
-  auto count = read_int32(images);
+  read_int32(targets);
+  auto count = read_int32(targets);
 
   auto tensor = torch::empty(count, torch::kByte);
   targets.read(reinterpret_cast<char*>(tensor.data_ptr()), count);
@@ -124,7 +124,7 @@ torch::data::Example<> get(size_t index) {
 }
 
   /// Returns the size of the dataset.
-std::optional<size_t> size() const {
+c10::optional<size_t> size() const {
   return images_.size(0);
 }
 
